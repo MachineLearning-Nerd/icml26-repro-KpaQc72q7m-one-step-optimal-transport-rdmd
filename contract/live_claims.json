@@ -1,0 +1,32 @@
+{
+  "orid": "KpaQc72q7m",
+  "title": "One-step Optimal Transport via Regularized Distribution Matching Distillation",
+  "source_snapshot": "outputs/live/20260803T063040Z/claims_anchored.json",
+  "claims": [
+    {
+      "id": 1,
+      "text": "Theorem 3.1 proves that as the transport-cost regularization weight lambda approaches 0, the RDMD objective's optimum converges to the Monge optimal transport map under quadratic cost and mild regularity conditions (Section 3.2, Theorem 3.1).",
+      "status": "unverified"
+    },
+    {
+      "id": 2,
+      "text": "The RDMD training objective (Section 3.1) combines a KL-divergence distribution-matching term between perturbed real/fake diffusion distributions with an explicit transport-cost regularization term lambda*E[c(x, G(x))], optimized via coordinate descent over the generator and a fake diffusion model (Section 3.1).",
+      "status": "unverified"
+    },
+    {
+      "id": 3,
+      "text": "On the AFHQv2 Cat-to-Wild 64x64 unpaired translation task, RDMD attains an FID of 6.9, compared to 2.0 for the pretrained (non-distilled) diffusion teacher, while achieving strictly higher SSIM and near-strictly higher PSNR than baselines including ILVR, SDEdit, and EGSDE (Section 5.2, Figure 4).",
+      "status": "unverified"
+    },
+    {
+      "id": 4,
+      "text": "A toy 2D experiment (single Gaussian to 8-Gaussian mixture) shows that setting the regularization weight lambda=0.2 balances distribution-matching fidelity against input-output correspondence, reducing trajectory intersections relative to unregularized distillation (Section 5.1).",
+      "status": "unverified"
+    },
+    {
+      "id": 5,
+      "text": "Appendix A gives a formal gamma-convergence proof that the RDMD objective converges to the hard-constrained Monge problem, supporting the claimed asymptotic optimality of the one-step generator (Appendix A).",
+      "status": "unverified"
+    }
+  ]
+}
