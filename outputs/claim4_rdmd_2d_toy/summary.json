@@ -1,0 +1,23 @@
+{
+  "controls": "lambda=0 unregularized surrogate and lambda=1 high-regularization surrogate",
+  "means": {
+    "0.0": {
+      "radial_target_mse": 0.1300661548743738,
+      "trajectory_intersections": 646.3333333333334,
+      "transport_mse": 8.23704422526995
+    },
+    "0.2": {
+      "radial_target_mse": 0.1300661548743738,
+      "trajectory_intersections": 646.3333333333334,
+      "transport_mse": 8.23704422526995
+    },
+    "1.0": {
+      "radial_target_mse": 0.1300661548743738,
+      "trajectory_intersections": 646.3333333333334,
+      "transport_mse": 8.23704422526995
+    }
+  },
+  "scope": "Reduced deterministic assignment surrogate preserving 2-D Gaussian/8-Gaussian, squared transport cost, target-fidelity proxy, and trajectory-intersection metric; not trained RDMD.",
+  "source_claim": "Section 5.1",
+  "verdict": "toy"
+}

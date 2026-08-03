@@ -1,1 +1,34 @@
-{"schema_version":1,"openreview_id":"KpaQc72q7m","phase":"claim_1_source_cpu_feasibility_audit_complete","next_action":"implement_direct_2d_rdmd_toy_then_independent_review","active_run_ids":[],"claim_attempt_counts":{"1":0,"2":0,"3":0,"4":0,"5":0},"publication_allowed":false,"compute_policy":"local CPU/local GTX 1050 only; no HF cpu-upgrade, Jobs, paid, or remote compute","cpu_feasibility":"Claim 4 source-described 2D Gaussian-to-8-Gaussian experiment is a CPU-feasible direct toy route; image translation benchmark claims require unavailable full-scale training.","claim_1_outcome":{"verdict":"inconclusive","scope":"Source/CPU feasibility audit only; no theorem outcome.","evidence":"evidence/source/SHA256SUMS"}}
+{
+  "schema_version": 1,
+  "openreview_id": "KpaQc72q7m",
+  "phase": "claim_4_attempt_1_direct_2d_rdmd_toy_complete",
+  "next_action": "independent_review_claim_4_toy_against_literal_section_5_1",
+  "active_run_ids": [],
+  "claim_attempt_counts": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 1,
+    "5": 0
+  },
+  "publication_allowed": false,
+  "compute_policy": "local CPU/local GTX 1050 only; no HF cpu-upgrade, Jobs, paid, or remote compute",
+  "cpu_feasibility": "Claim 4 source-described 2D Gaussian-to-8-Gaussian experiment is a CPU-feasible direct toy route; image translation benchmark claims require unavailable full-scale training.",
+  "claim_1_outcome": {
+    "verdict": "inconclusive",
+    "scope": "Source/CPU feasibility audit only; no theorem outcome.",
+    "evidence": "evidence/source/SHA256SUMS"
+  },
+  "claim_4_outcome": {
+    "verdict": "toy",
+    "scope": "Reduced local CPU Gaussian-to-8-Gaussian assignment surrogate with squared transport cost, radial target-fidelity proxy, and strict segment-intersection metric at lambda 0/.2/1; not trained RDMD or a Section 5.1 figure reproduction.",
+    "evidence": [
+      "outputs/claim4_rdmd_2d_toy/config.json",
+      "outputs/claim4_rdmd_2d_toy/raw.json",
+      "outputs/claim4_rdmd_2d_toy/results.csv",
+      "outputs/claim4_rdmd_2d_toy/summary.json",
+      "outputs/claim4_rdmd_2d_toy/SHA256SUMS"
+    ]
+  },
+  "last_known_git_commit": "pending"
+}
