@@ -1,0 +1,497 @@
+\section{Theory}
+\label{sec:theory}
+In this section, we aim at proving the main theoretical result of the work: solution of the soft-constrained RDMD objective converges to the solution of the hard-constrained Monge problem. Our proof is largely based on the work~\cite{liero2018optimal}. It introduces the family of entropy-transport problems, consisting in optimizing the transport cost with soft constraints based on the divergence between the map's output distribution and the target. There are, however, differences between the problems, that prevent us from reducing the functional in Equation~\ref{eq:rdmd_loss} to the entropy-transport problems. First, authors consider the case of finite non-negative measures, while we stick to the probability distributions. Second, the family of Csisz{\'a}r $f$-divergences~\cite{csiszar1967information}, used in~\cite{liero2018optimal}, seemingly does not contain the integral ensemble of KL divergences, used in Equation~\ref{eq:rdmd_loss}. Finally, we illustrate the proof in a simpler particular setting for the narrative purposes. Nevertheless, the used ideas are very similar.
+
+\subsection{Proof outline}
+\label{subsec:proof_outline}
+We start by giving a simple outline of the proof. Given a pair of source and target distributions $\psource$ and $\ptarget$, RDMD optimizes the following functional with respect to the generator $G$:
+\begin{equation}
+    \int\limits_{0}^{\Tmax} \klweight \KL\left(\pgen_t \,\|\, \ptarget_t\right) \rmd t + \lambda\,\E_{\psource(\x)} c\left(\x, G(\x)\right),
+\end{equation}
+where $\pgen_t$ and $\ptarget_t$ are the generator distribution $\pgen$ and the target distribution $\ptarget$, perturbed by the forward diffusion process up to the time step $t$. Our goal is to prove that the optimal generator of the regularized objective converges to the optimal transport map when $\lambda \rightarrow 0$. With a slight abuse of notation, in this section we will use a different objective
+\begin{equation}
+\label{eq:rdmd_alpha}
+    \loss^\alpha(G) = \alpha\, \int\limits_{0}^{\Tmax} \klweight \KL\left(\pgen_t \,\|\, \ptarget_t\right) \rmd t + \,\E_{\psource(\x)} c\left(\x, G(\x)\right)
+\end{equation}
+and consider the equivalent limit $\alpha \rightarrow + \infty$. We also define 
+\begin{equation}
+    \loss^\infty(G) = \begin{dcases}
+        \E_{\psource(\x)} c\left(\x, G(\x)\right), \text{ if }\,\pgen = \ptarget; \\
+        + \infty, \text{ else}
+    \end{dcases}
+\end{equation}
+to be the objective, corresponding to the unconditional formulation of the Monge problem (Equation~\ref{eq:monge_ot_problem}). In this section, we will denote minimum of this objective (which is, therefore, the optimal transport map) as $G^\infty$~\footnote{Solution to the Monge problem is not always unique, but we will further impose assumptions that will guarantee the uniqueness.}
+
+We first assume that the infimum of the objective $\loss^\alpha$ is reached and define $G^\alpha$ be the optimal generator. We denote by $\{\alpha_n\}_{n = 1}^{+ \infty}$ an arbitrary sequence with $\alpha_n \rightarrow +\infty$. We first make two informal assumptions that need to be proved (and will be in some sence further in the section):
+\begin{enumerate}
+    \item The sequence $G^{\alpha_n}$ converges (in some sence) to some function $\hat{G}$;
+    \item $\loss^\alpha$ is continuous with respect to this convergence, i.e. for every convergent sequence $G_n \rightarrow G$ holds $\loss^\alpha(G_n) \rightarrow \loss^\alpha(G)$.
+\end{enumerate}
+
+Given this, we first observe that for each map $G$ the sequence of objectives $\loss^{\alpha_n}(G)$ monotonically converges to the objective $\loss^\infty(G)$. It follows from the fact that the first summand of $\loss^{\alpha_n}$ converges to $+\infty$ if and only if the KL divergence is non-zero, which is equivalent to saying that $\pgen$ and $\ptarget$ differ~\cite{wang2024prolificdreamer}. If instead $\pgen = \ptarget$, the summand zeroes out. This also means that the minimal values of the corresponding objectives form a monotonic sequence:
+\begin{equation}
+    \loss^{\alpha_n}(G^{\alpha_n}) \leq \loss^{\alpha_{n + 1}}(G^{\alpha_{n + 1}}) \leq \loss^{\infty}(G^\infty).
+\end{equation}
+
+Finally, the monotonicity implies that for a fixed $m$
+\begin{equation}
+    \lim\limits_{n \rightarrow \infty} \loss^{\alpha_n}(G^{\alpha_n}) \geq \lim\limits_{n \rightarrow \infty} \loss^{\alpha_m}(G^{\alpha_n}),
+\end{equation}
+since the input $G^{\alpha_n}$ is fixed and $\mathcal{L}^{\alpha_n}$ monotonically increases. Using the assumed continuity of the objective, we obtain
+\begin{equation}
+    \lim\limits_{n \rightarrow \infty} \loss^{\alpha_n}(G^{\alpha_n}) \geq \loss^{\alpha_m}(\hat{G})
+\end{equation}
+for each $m$. Taking the limit $m \rightarrow \infty$, we obtain
+\begin{equation}
+    \lim\limits_{n \rightarrow \infty} \loss^{\alpha_n}(G^{\alpha_n}) \geq \loss^\infty(\hat{G}).
+\end{equation}
+Combining this set of equations, we obtain:
+\begin{equation}
+    \loss^\infty(G^\infty) \geq \lim\limits_{n \rightarrow \infty} \loss^{\alpha_n}(G^{\alpha_n}) \geq \loss^\infty(\hat{G}) \geq \loss^\infty(G^\infty),
+\end{equation}
+where the first inequality comes from the monotonicity of the minimal values and the last inequality uses that $G^\infty$ is the minimum of the objective $\loss^\infty$. Hence, that limiting map $\hat{G}$ achieves minimal value of the objective $\loss^\infty$ and is, therefore, the optimal transport map.
+
+At this point, we only need to define and prove some versions of the aforementioned facts:
+\begin{enumerate}
+    \item Infimum of $\loss^{\alpha}$ is reached;
+    \item The sequence of minima $G^{\alpha_n}$ converges;
+    \item $\loss^{\alpha}$ is continuous with respect to this convergence.
+\end{enumerate}
+
+From now on, we formulate the result in details and stick to the formal proof.
+
+\subsection{Assumptions and theorem statement}
+
+First, we list the assumptions.
+
+\begin{assumption}
+\label{A1}
+    The distributions $\psource$ and $\ptarget$ have densities with respect to the Lebesgue measure. The distributions are defined on open bounded subsets $\mathcal{X} \subset \Rd$ and $\mathcal{Y} \subset \Rd$, where $\mathcal{Y}$ is convex. The densities are bounded away from zero and infinity on $\mathcal{X}$ and $\mathcal{Y}$, respectively.
+\end{assumption}
+
+We admit that boundedness of the support is a very restrictive assumption from the theoretical standpoint, however in our applications (I2I) both source and target distributions are supported on the bounded space of images. We thus can set $\mathcal{X} = \mathcal{Y} = (0, 1)^d$.
+
+\begin{assumption}
+\label{A2}
+    The cost $c(\x, \y)$ is quadratic $\|\x - \y\|^2$.
+\end{assumption}
+
+Here, we stick to proving the theorem only for $L_2$ cost due to difficulties in investigation of Monge map existence and regularity for general transport costs~\cite{de2014monge}.
+\begin{assumption}
+\label{A3}
+    The weighting function $\klweight$ is positive and bounded.
+\end{assumption}
+
+\begin{assumption}
+\label{A4}
+    Standard deviation $\sigma_t$ of the noise, defined by the forward process, is continuous in $t$.
+\end{assumption}
+ 
+\setcounter{theorem}{0}
+\begin{theorem}
+\label{thm1_app}
+    Let $\psource$, $\ptarget, c\,, \klweight,$ and $\sigma_t$ satisfy the assumptions \textbf{1-3}. Then, there exists a minimum $G^\alpha$ of the objective $\loss^\alpha$ from the Equation~\ref{eq:rdmd_alpha}. If $\alpha_n \rightarrow \infty$, the sequence $G^{\alpha_n}$ converges in probability (with respect to the source distribution) to the optimal transport map $G^\infty$: 
+\begin{equation}
+    G^{\alpha_n} \xrightarrow[n \rightarrow \infty]{\psource} G^\infty.
+\end{equation}
+\end{theorem}
+
+\subsection{Theoretical background}
+\label{subsec:weak_conv}
+We start by listing all the results necessary for the proof. They are mostly related to the topics of measure theory (weak convergence, in particular) and optimal transport. Most of these classic facts can be found in the books~\cite{bogachev2007measure, dudley2018real}. Otherwise, we make the corresponding citations.
+\begin{definition}
+    A sequence of probability distributions $p^n(\x)$ converges weakly to the distribution $p(\x)$ if for all continuous bounded test functions $\varphi \in \Cb(\Rd)$ holds
+    \begin{equation}
+        \E_{p^n(\x)} \varphi(\x) \xrightarrow[n \rightarrow \infty]{} \E_{p(\x)}\varphi(\x).
+    \end{equation}
+    Notation: $p^n \weak p$.
+\end{definition}
+
+\begin{definition}
+    A function $f : \Rd \rightarrow \R$ is called lower semi-continuous (lsc), if for all $\x_n \rightarrow \x$ holds
+    \begin{equation}
+        \liminf\limits_{n \rightarrow \infty} f(\x_n) \geq f(\x).
+    \end{equation}
+\end{definition}
+
+\begin{theorem}[Portmanteau/Alexandrov]
+\label{thm:alexandrov}
+    $p^n \weak p$ is equivalent to the following statement: for every lsc function $f$, bounded from below, holds
+    \begin{equation}
+        \liminf\limits_{n \rightarrow \infty}\E_{p^n(\x)}f(\x) \geq \E_{p(\x)}f(\x).
+    \end{equation}
+\end{theorem}
+
+\begin{definition}
+    A sequence of probability measures $p^n$ is called relatively compact, if for every subsequence $p^{n_k}$ there exists a weakly convergent subsequece $p^{n_{k_j}}$.
+\end{definition}
+
+\begin{definition}
+    A sequence of probability measures $p^n$ is called tight, if for every $\eps > 0$ there exists a compact set $K_\eps$ such that $p^n(K_\eps) \geq 1 - \eps\,$ for all $n$.
+\end{definition}
+
+\begin{theorem}[Prokhorov]
+\label{thm:prokhorov}
+    A sequence of probability measures $p^n$ is relatively compact if and only if it is tight. In particular, every weakly convergent sequence is tight.
+\end{theorem}
+
+\begin{corollary}
+\label{thm:prokhorov_bound}
+    If there exists a function $\varphi(\x)$ such that its sublevels $\{ \x : \varphi(x) \leq r\}$ are compact and for all $n$
+    \[
+        \E_{p^n(\x)}\varphi(x) \leq C
+    \]
+    holds with some constant $C$, then $p^n$ is tight (i.e. at least it has a weakly convergent subsequence).
+\end{corollary}
+
+\begin{corollary}
+\label{thm:prokhorov_convergence}
+    If a sequence $p^n$ is tight and all of its weakly convergent subsequences converge to the same measure $p$, then $p^n \weak p$.
+\end{corollary}
+
+\begin{definition}
+    The functional $\loss(p)$ is called lower semi-continuous (lsc) with respect to the weak convergence if for all weakly convergent sequences $p^n \weak p$ holds
+    \begin{equation}
+        \liminf\limits_{n \rightarrow \infty} \loss(p^n) \geq \loss(p).
+    \end{equation}
+\end{definition}
+
+\begin{theorem}[\citealt{posner1975random}]
+\label{thm:kl_lsc}
+    The \textup{KL} divergence $\textup{\KL}(p \,\|\, q)$ is lsc (in sense of weak convergence) with respect to each argument, i.e. if $p^n \weak p$ and $q_n \weak q$, then
+    \begin{align}
+        &\liminf\limits_{n \rightarrow \infty} \textup{\KL}(p^n \,\|\, q) \geq \textup{\KL}(p \,\|\, q)\\
+        &\liminf\limits_{n \rightarrow \infty} \textup{\KL}(p \,\|\, q_n) \geq \textup{\KL}(p \,\|\, q).
+    \end{align}
+\end{theorem}
+
+\begin{theorem}[\citealt{donsker1983asymptotic}]
+\label{thm:donsker_varadhan}
+    The \textup{KL} divergence can be expressed as
+    \begin{equation}
+    \label{eq:kl_variational}
+        \textup{\KL}(p \| q) = \sup\limits_{g} \left(\E_{p(\x)} g(\x) - \log \E_{q(\x)} e^{g(\x)} \right).
+    \end{equation}
+\end{theorem}
+
+\begin{definition}
+    The expression
+    \begin{equation}
+        \E_{p(\x)} e^{i \langle s , \x \rangle}
+    \end{equation}
+    is called the characteristic function (Fourier transform) of the distribution $p(\x)$. 
+\end{definition}
+
+\begin{theorem}[Lévy]
+\label{thm:continuity}
+    Weak convergence of probability measures $p^n \weak p$ is equivalent to the point-wise convergence of characteristic functions, i.e. $\E_{p^n(\x)} e^{i \langle s , \x \rangle} \rightarrow \E_{p(\x)} e^{i \langle s , \x \rangle}$ for all $s$.
+\end{theorem}
+
+\begin{definition}
+    A sequence of measurable functions $\varphi^n(\x)$ is said to converge in measure (in probability) to the function $\varphi$ with respect to the measure $p(\x)$, if for all $\eps > 0$ holds
+    \[
+        p\left(\{\x : |\varphi^n(\x) - \varphi(\x)| > \eps \}\right) \rightarrow 0.
+    \]
+\end{definition}
+
+\begin{theorem}[Lebesgue]
+\label{thm:lebesgue}
+    Let $\varphi^n, \varphi$ be measurable functions such that $\|\varphi^n(\x)\|, \|\varphi(\x)\| \leq C$ and $\varphi^n(\x) \rightarrow \varphi(\x)$ pointwise. Then $\E_{p(\x)}\varphi^n(\x) \rightarrow \E_{p(\x)}\varphi(\x)$.
+\end{theorem}
+
+\begin{lemma}[Fatou]
+\label{thm:fatou}
+    For any sequence of measurable functions $\varphi^n$ the function $\liminf_n \varphi^n$ is measurable and
+    \begin{equation}
+        \int\limits_{a}^{b}\liminf\limits_{n \rightarrow \infty} \varphi^n(\x) \rmd \x \leq \liminf\limits_{n \rightarrow \infty} \int\limits_{a}^{b} \varphi^n(\x) \rmd \x.
+    \end{equation}
+\end{lemma}
+
+
+
+\begin{theorem}[\citealt{brenier1991polar}]
+\label{thm:brenier}
+    Given the Assumption~\ref{A1}, there exists a unique optimal transport map that solves the Monge problem~\ref{eq:monge_ot_problem} for the quadratic cost.
+\end{theorem}
+\begin{proof}
+This result can be found e.g. in~\citep[Theorem~3.1]{de2014monge}.
+\end{proof}
+\begin{theorem}
+\label{thm:ot_continuous}
+    Given the Assumption~\ref{A1}, the unique OT Monge map is continuous.
+\end{theorem}
+\begin{proof}
+This is a simplified version of~\citep[Theorem~3.3]{de2014monge}.
+\end{proof}
+
+\subsection{Lower semi-continuity of the loss}
+\label{subsec:loss_lsc}
+Having defined all the needed terms and results, we start the proof by re-defining the objective in Equation~\ref{eq:rdmd_alpha} with respect to the joint distribution $\pi$ input and output of the generator instead of the generator $G$ itself. Analogous to the Kantorovitch formulation of the optimal transport problem~\cite{kantorovitch1958translocation}, for each measure $\pi$ on $\Rd \times \Rd$ (which is also called a \emph{transport plan} or just plan) we define the corresponding fuctional as
+\begin{equation}
+    \loss^\alpha(\pi) = \alpha\, \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi_{\y, t} \,\|\, \ptarget_t\right) \rmd t + \,\E_{\pi(\x, \y)} c\left(\x, \y\right),
+\end{equation}
+where $\pi_{\x}$ and $\pi_{\y}$ are the corresponding projections (marginal distributions) of $\pi$ and $\pi_{\y, t}$ is the perturbed $\y$-marginal distribution of $\pi$.  Note that for $\pi$, corresponding to the joint distribution of $(\x, G(\x))$, $\loss^\alpha(\pi)$ coincides with $\loss^\alpha(G)$, defined in Equation~\ref{eq:rdmd_alpha}. Thus, we aim to optimize $\loss^\alpha(\pi)$ with respect to such plans $\pi$, that their $\x$ marginal is equal to $\psource$ and $\pi(\y = G(\x)) = 1$ for some $G$.
+\begin{definition}
+\label{def:generator_based}
+    We will call a measure $\pi$ generator-based if its $\x$-marginal is equal to $\psource$ and $\pi(\y = G(\x))$ for some function $G$.
+\end{definition}
+
+For the sake of clearity, we note that the distributions $\pi^{\y}_t$ and $\ptarget_t$ can be represented as $\pi^{\y} * q_t$ and $\ptarget * q_t$, where $*$ is the convolution operation and $q_t = \N(0, \sigma_t^2 I)$. We thus rewrite the functional as
+\begin{equation}
+    \loss^\alpha(\pi) = \alpha\, \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi_{\y} * q_t \,\|\, \ptarget * q_t \right) \rmd t + \,\E_{\pi(\x, \y)} c\left(\x, \y\right),
+\end{equation}
+Previously, we wanted to establish continuity of the objective. This may not be the case in general. Instead, we prove the following
+\begin{lemma}
+    $\loss^\alpha(\pi)$ is lsc with respect to the weak convergence, i.e. for all weakly convergent sequences $\pi^n \weak \pi$ holds 
+    \begin{equation}
+        \liminf\limits_{n \rightarrow \infty} \loss^\alpha(\pi^n) \geq \loss^\alpha(\pi).
+    \end{equation}
+\end{lemma}
+This result is a direct consequence of the Theorem~\ref{thm:kl_lsc} about lower semi-continuity of the KL divergence.
+\begin{proof}
+     We start by proving that the projection and the convolution operation preserve weak convergence. For the first, we need to prove that for any test function $g \in \Cb(\Rd)$ holds \begin{equation}
+         \E_{\pi^{n}_{\y}(\y)} g(\y) \rightarrow \E_{\pi_{\y}(\y)} g(\y)
+     \end{equation} given $\pi^n \weak \pi$. For this, we note that the function $\varphi(\x, \y) = g(\y)$ is also bounded and continuous and, thus
+     \begin{equation}
+         \E_{\pi^{n}_{\y}(\y)} g(\y) = \E_{\pi^n(\x, \y)}\varphi(\x, \y) \rightarrow \E_{\pi(\x, \y)}\varphi(\x, \y) = \E_{\pi_{\y}(\y)} g(\y).
+     \end{equation}
+     Regarding the convolution, recall that $\pi^n_{\y} * q_t$ is the distribution of the sum of independent variables with corresponding distributions. Its characteristic function is equal to
+     \begin{equation}
+         \E_{\pi^n_{\y} * q_t (\y_t)} e^{i \langle s, \y_t \rangle} = \E_{\pi^n_{\y}(\y)q_t(\eps_t)}e^{i \langle s, \y + \eps_t \rangle} = \E_{\pi^n_{\y}(\y)}e^{i\langle s, \y \rangle}\E_{q_t(\eps_t)}e^{i\langle s, \eps_t \rangle}.
+     \end{equation}
+    Applying the Lévy's continuity theorem to $\pi^n_{\y} \weak \pi_{\y}$, we take the limit and obtain
+    \begin{equation} 
+        \E_{\pi_{\y}(\y)}e^{i\langle s, \y \rangle}\E_{q_t(\eps_t)}e^{i\langle s, \eps_t \rangle} = \E_{\pi_{\y}(\y)q_t(\eps_t)}e^{i \langle s, \y + \eps_t \rangle} = \E_{\pi_{\y} * q_t (\y_t)} e^{i \langle s, \y_t \rangle},
+    \end{equation}
+    which implies 
+    \begin{equation}
+        \E_{\pi^n_{\y} * q_t (\y_t)} e^{i \langle s, \y_t \rangle} \rightarrow \E_{\pi_{\y} * q_t (\y_t)} e^{i \langle s, \y_t \rangle}.
+    \end{equation}
+    We apply the continuity theorem for the convolutions and obtain $\pi^n_{\y} * q_t \weak \pi_{\y} * q_t$.
+
+    With this observation, we prove that the first term of $\loss^\alpha(\pi)$ is lsc. First, we apply Lemma~\ref{thm:fatou} (Fatou) and move the limit inside the integral
+    \begin{equation}
+    \label{eq:fatou_inside_kl}
+        \liminf\limits_{n \rightarrow \infty}\int \limits_{0}^{\Tmax} \klweight \KL\left(\pi^n_{\y} * q_t \,\|\, \ptarget * q_t \right) \rmd t \geq \int \limits_{0}^{\Tmax} \liminf\limits_{n \rightarrow \infty}\klweight \KL\left(\pi^n_{\y} * q_t \,\|\, \ptarget * q_t \right) \rmd t.
+    \end{equation}
+    Using the lower semi-continuity of the KL divergence (Theorem~\ref{thm:kl_lsc}), we obtain
+    \begin{equation}
+    \label{eq:lsc_inside_kl}
+        \int \limits_{0}^{\Tmax} \liminf\limits_{n \rightarrow \infty}\klweight \KL\left(\pi^n_{\y} * q_t \,\|\, \ptarget * q_t \right) \rmd t \geq \int\limits_{0}^{\Tmax} \klweight \KL \left(\pi_{\y} * q_t \,\|\, \ptarget * q_t\right) \rmd t.
+    \end{equation}
+    Finally, the Assumption~\ref{A2} on the continuity of $c(\cdot, \cdot)$ implies its lower semi-coninuity. Theorem~\ref{thm:alexandrov} (Portmanteau) states that 
+    \begin{equation}
+    \label{eq:alexandrov_for_ot}
+        \liminf\limits_{n \rightarrow \infty} \E_{\pi^n(\x, \y)} c(\x, \y) \geq \E_{\pi(\x, \y)}c(\x, \y).
+    \end{equation}
+    Combining inequalities from Equation~\ref{eq:fatou_inside_kl}, Equation~\ref{eq:lsc_inside_kl} and Equation~\ref{eq:alexandrov_for_ot}, we obtain
+    \begin{equation}
+        \liminf\limits_{n \rightarrow \infty} \loss^\alpha(\pi^n) \geq \loss^\alpha(\pi).
+    \end{equation}
+\end{proof}
+\subsection{Existence of the minimizer}
+\label{subsec:inf}
+Now we aim to prove that the objective $\loss^\alpha(\pi)$ has a minimum over generator-based plans. 
+First, we need the following technical lemma about sublevels of the KL part of the functional.
+\begin{lemma}
+\label{lemma:tightness}
+    Let $\{\pi^{n}\}_{n = 1}^{\infty}$ be a sequence of generator-based plans that satisfy 
+    \begin{equation}
+        \int\limits_{0}^{\Tmax} \klweight \textup{\KL}\left(\pi^n_{\y, t} \,\|\, \ptarget_t \right) \rmd t \leq C
+    \end{equation}
+    for some constant $C$. Then, the sequence $\{\pi^n\}_{n = 1}^{\infty}$ is tight.
+\end{lemma}
+\begin{proof}
+    We take arbitrary $\pi$ from the sequence and apply the Donsker-Varadhan representation (Theorem~\ref{thm:donsker_varadhan}) of the KL divergence. We take the test function $g(\x) = \|x\|^2 / (2\sigma_{\Tmax}^2)$ and obtain
+    \begin{equation}
+        \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi_{\y, t} \,\|\, \ptarget_t\right) \rmd t \geq \int\limits_{0}^{\Tmax} \klweight \left(\E_{\pi_{\y, t}(\y_t)} \frac{1}{2\sigma_{\Tmax}^2} \|\y_t\|^2 - \log \E_{\ptarget_t(\y_t)}e^{ \|\y_t\|^2 / (2\sigma_{T}^2)} \right) \rmd t.
+    \end{equation}
+    The choice of $g(\x)$ is not very specific, i.e. every function that will produce finite expectations and integrals is suitable. In the right-hand side, we rewrite the expectations with repect to the original variable and noise:
+    \begin{equation}
+    \int\limits_{0}^{\Tmax} \klweight \left(\E_{\pi_{\y}(\y)\N(\eps | 0, I)}\frac{1}{2\sigma_{\Tmax}^2} \|\y + \sigma_t \eps \|^2 - \log \E_{\ptarget(\y)\N(\eps | 0, I)}e^{\|\y + \sigma_t \eps \|^2 / (2 \sigma_{\Tmax}^2)}\right) \rmd t.
+    \end{equation}
+    We rewrite $\|\y + \sigma_t \eps \|^2$ as $\|\y\|^2 + 2 \sigma_t \langle \y, \sigma_t \eps \rangle + \sigma_t^2 \|\eps\|^2$ and note that expectation of the second term is zero. The first term is then equal to
+    \begin{equation}
+        \frac{1}{2\sigma_{\Tmax}^2} \int\limits_{0}^{\Tmax} \klweight \rmd t \cdot \E_{\pi_{\y}(\y)}\|\y\|^2 + \frac{1}{2\sigma_{\Tmax}^2} \int\limits_{0}^{\Tmax} \klweight \sigma_{t}^2 \rmd t \cdot \E_{\N(\eps | 0, I)} \|\eps \|^2.
+    \end{equation}
+    Boundedness of $\omega_t$ (Assumption~\ref{A3}) implies that the first integral is finite and, say, equal to $C_1$. The second integral contains a product of bounded $\omega_t$ and continuous $\sigma_t^2$ (Assumtion~\ref{A4}), which is also integrable. We then denote the second summand by $C_2$ and rewrite the first summand as
+    \begin{equation}
+        C_1 \E_{\pi_{\y}(\y)} \| \y \|^2 + C_2.
+    \end{equation}
+    As for the second summand, we see that the expectation    \begin{equation}
+        \E_{\ptarget(\y)\N(\eps | 0, I)}e^{\|\y + \sigma_t \eps\|^2 / (2 \sigma_{\Tmax}^2)}
+    \end{equation}
+    with respect to $\eps$ will be finite, because $\sigma_t^2 / (2\sigma_{\Tmax}^2)$ is always less than $1/2$, which will make the exponent have negative degree. Moreover, simple calculations show that this function will be continuous with respect to $\sigma_t$ and have only quadratic terms with respect to $\y$ inside the exponent, i.e. have the form
+    \begin{equation}
+        e^{a(\sigma_t) \|\y - b(\sigma_t)\|^2 + c(\sigma_t)}
+    \end{equation}
+    with continuous $a, b, c$. We now want to prove that the expectation 
+    \begin{equation}
+        \E_{\ptarget(\y)}e^{\alpha(\sigma_t) \|\y - \beta(\sigma_t)\|^2 + \gamma(\sigma_t)}
+    \end{equation}
+    will also be continuous in $t$. First, due to the boundedness of $\y$, this expectation is finite. Second, for $t_n \rightarrow t$:
+    \begin{align}
+        \lim\limits_{n \rightarrow \infty}&\E_{\ptarget(\y)}e^{a(\sigma_{t_n}) \|\y - b(\sigma_{t_n})\|^2 + c(\sigma_{t_n})} = \\
+        = \:&\E_{\ptarget(\y)} \lim\limits_{n \rightarrow \infty} e^{a(\sigma_{t_n}) \|\y - b(\sigma_{t_n})\|^2 + c(\sigma_{t_n})} = \\
+        = \:&\E_{\ptarget(\y)} e^{a(\sigma_{t}) \|\y - b(\sigma_{t})\|^2 + c(\sigma_{t})}
+    \end{align}
+    due to the Theorem~\ref{thm:lebesgue} (Lebesgue's dominated convergence). It is applicable, since $\y$ is bounded and all the functions are continuous, thus bounded in $[0, T]$.
+
+    We thus obtain that the second integral contains bounded $\omega_t$ multiplied by the logarithm of continuous function, which is always $\geq 1$ (positive exponent). This means that the whole integral is finite. Denoting it by $C_3$, we obtain
+    \begin{equation}
+        C_1 \E_{\pi_{\y}(\y)} \|\y\|^2 + C_2 - C_3\leq \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi_{\y, t} \,\|\, \ptarget_t\right) \rmd t.
+    \end{equation}
+    Combined with the condition of the lemma, we obtain
+    \begin{equation}
+        C_1 \E_{\pi_{\y}(\y)} \|\y\|^2 + C_2 - C_3 \leq \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi_{\y, t} \,\|\, \ptarget_t\right) \rmd t  \leq C,
+    \end{equation}
+    which implies
+    \begin{equation}
+        \E_{\pi_{\y}(\y)} \|\y\|^2 \leq \frac{C + C_3 - C_2}{C_1} := C_4.
+    \end{equation}
+    We thus obtained a uniform bound on some statistic with respect to all measures from $\{\pi^n\}$. The function $\|\y\|^2$ has compact sublevel sets $\{ \|\y\|^2 \leq r\}$. Lemma~\ref{thm:prokhorov_bound} then states that the sequence $\pi^{n}_{\y}$ is tight, i.e. for all $\eps > 0$ there is a compact set $K_\eps$ with $\pi^{n}_{\y}(\y \in K_\eps) \geq 1 - \eps$. 
+
+    Finally, marginal $\x$ distribution of each of the $\pi^{n}$ is $\psource$, which is bounded (Assumption~\ref{A1}), i.e. there is a compact $K$ that $\pi^n(\x \in K) = 1$. Combined with the previous observation, we obtain
+    \begin{equation}
+        \pi^n(\x \in K, \y \in K_\eps) \geq 1 - \eps
+    \end{equation}
+    for all $n$. The cartesian product $K \times K_\eps$ is also compact. Theorem~\ref{thm:prokhorov} (Prokhorov) then implies that the sequence $\pi^n$ is tight.
+\end{proof}
+
+Now we are ready to prove the following
+\begin{lemma}
+    Infimum of the loss $\loss^\alpha(\pi)$ over all generator-based transport plans $\pi$ (with $\pi_{\x} = \psource$ and $\pi(\y = G(\x))$ for some $G$) is attained on some plan $\hat{\pi}$.
+\end{lemma}
+\begin{proof}
+    We start by observing that there is at least one feasible $\pi$ with the aforementioned properties. For this purpose one can take the optimal transport map $G^\infty$ between $\psource$ and $\ptarget$, which is unique by Theorem~\ref{thm:brenier} under Assumptions~\ref{A1},~\ref{A2}.
+
+    Let $\pi^n$ be a sequence of feasible generator-based measures that $\loss^\alpha(\pi^n)$ converges to the corresponding infimum $\loss^\alpha_{\inf}$ (it exists by the definition of the infimum). Without loss of generality, we can assume that $\loss^\alpha(\pi^n) \leq \loss^\alpha_{\inf} + 1$ for all $n$ (if not, one can drop large enough sequence prefix). This implies that for all $n$ holds
+
+    \begin{equation}\alpha\, \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi_{\y, t} \,\|\, \ptarget_t\right) \rmd t \leq \loss^\alpha_{\inf} + 1.
+    \end{equation}
+
+    Lemma~\ref{lemma:tightness} implies that the sequence $\pi^n$ is tight. Prokhorov theorem then states that $\pi^n$ has a weakly convergent subsequence $\pi^{n_k} \weak \hat{\pi}$. Lower semi-continuity of the loss $\loss^\alpha$ implies that
+    \begin{equation}
+        \liminf\limits_{k \rightarrow \infty} \loss^\alpha(\pi^{n_k}) \geq \loss^\alpha(\hat{\pi}) \geq \loss^\alpha_{\inf}.
+    \end{equation}
+    At the same time, $\loss^\alpha(\pi^{n_k})$ is assumed to converge to $\loss^\alpha_{\inf}$, which means that $\hat{\pi}$ is indeed the minimum.
+\end{proof}
+
+\subsection{Finish of the proof}
+\label{subsec:proof}
+\begin{proof}[Theorem~\ref{thm1_app} proof]
+Finally, we combine the previous technical observations with the proof sketch from the Section~\ref{subsec:proof_outline}. Let $\alpha_n \rightarrow \infty$ be a sequence of coefficients, $G^{\alpha_n}$ be the optimal generators with respect to $\loss^{\alpha_n}$ and $\pi^{\alpha_n}$ the joint distributions of $(\x, G^{\alpha_n}(\x))$. Additionally, we define $\pi^\infty$ to be the optimal transport plan, corresponding to $(\x, G^\infty(\x))$, where $G^\infty(\x)$ is the optimal transport map. First, due to the monotonicity of $\loss^\alpha$ with respect to $\alpha$, we have
+\begin{equation}
+    \loss^{\alpha_n}(\pi^{\alpha_n}) \leq \loss^{\alpha_{n + 1}}(\pi^{\alpha_{n + 1}}) \leq \loss^{\infty}(\pi^\infty).
+\end{equation}
+This implies that for all $n$ holds
+\begin{align}
+    \alpha_n &\int\limits_{0}^{\Tmax} \klweight \KL\left(\pi^{\alpha_n}_{\y, t} \,\|\, \ptarget_t\right) \rmd t \leq \loss^\infty(\pi^\infty) \Rightarrow \\
+    \Rightarrow & \int\limits_{0}^{\Tmax} \klweight \KL\left(\pi^{\alpha_n}_{\y, t} \,\|\, \ptarget_t\right) \rmd t \leq \frac{\loss^\infty(\pi^\infty)}{\alpha_n} \leq \frac{\loss^\infty(\pi^\infty)}{\min\limits_{n} \alpha_n},
+\end{align}
+which is finite, since $\alpha_n \rightarrow +\infty$. One more time, we apply Lemma~\ref{lemma:tightness} and conclude that the sequence $\pi^{\alpha_n}$ is tight.
+
+Let $\pi^{\alpha_{n_k}}$ be its weakly convergent subsequence: $\pi^{\alpha_{n_k}} \weak \hat{\pi}$. Analogously to the Section~\ref{subsec:proof_outline}, we observe that
+\begin{equation}
+    \liminf\limits_{k \rightarrow \infty} \loss^{\alpha_{n_k}} (\pi^{\alpha_{n_k}}) \geq \liminf\limits_{k \rightarrow \infty}\loss^{\alpha_{n_m}}(\pi^{\alpha_{n_k}}) \geq \loss^{\alpha_{n_m}}(\hat{\pi})
+\end{equation}
+for any fixed $m$. The first inequality is due to the monotonicity of $\loss^\alpha$ with respect to $\alpha$ and second is the implication of lower semi-continuity of the loss $\loss^\alpha$ with respect to weak convergence. Taking the limit $m \rightarrow \infty$, we obtain
+\begin{equation}
+     \liminf\limits_{k \rightarrow \infty} \loss^{\alpha_{n_k}} (\pi^{\alpha_{n_k}}) \geq \loss^{\infty}(\hat{\pi}).
+\end{equation}
+
+
+Combining all these observations, we obtain the following sequence of inequalities
+\begin{equation}
+    \loss^{\infty}(\pi^\infty) \geq \liminf\limits_{k \rightarrow \infty} \loss^{\alpha_{n_k}} (\pi^{\alpha_{n_k}}) \geq \loss^\infty(\hat{\pi}) \geq \loss^\infty(\pi^\infty),
+\end{equation}
+which implies that the limiting measure $\hat{\pi}$ reaches the minimum of the objective over generator-based plans. By the uniqueness of the optimal transport map $G^\infty$ under the Assumptions~\ref{A1},~\ref{A2},~\ref{A3}, we conclude that all the convergent subsequences $\pi^{\alpha_{n_k}}$ converge to the optimal measure $\pi^\infty$. Using Corollary~\ref{thm:prokhorov_convergence} of the Prokhorov theorem, we deduce that $\pi^{\alpha_n} \weak \pi^\infty$.
+
+Finally, we want to replace the weak convergence of $\pi^{\alpha_n}$ to $\pi^\infty$ with the convergence in probability of the generators, i.e. show
+\begin{equation}
+    G^{\alpha_n} \xrightarrow[]{\psource} G^\infty.
+\end{equation}
+To this end, we represent the corresponding probability as the expectation of the indicator and upper bound it with a continuous function:
+\begin{align}
+    \psource\left(\|G^{\alpha_n}(\x) - G^{\infty}(\x)\| > \eps\right) &= \E_{\psource(\x)}I\{\|G^{\alpha_n}(\x) - G^{\infty}(\x)\| > \eps\} \\
+    &\leq \E_{\psource(\x)} d\left(G^{\alpha_n}(\x), G^{\infty}(\x)\right),
+\end{align}
+where $d$ is a continuous indicator approximation, defined as
+\begin{equation}
+    d(\bu, \bv) = \begin{cases}
+        \frac{\|\bu - \bv \|}{\eps}, &\text{ if }\, 0 \leq \|\bu - \bv \| < \eps;\\
+        1, &\text{ if }\, \|\bu - \bv\| \geq \eps.
+    \end{cases}
+\end{equation}
+We define the test function
+\begin{equation}
+    \varphi(\x, \y) = d\left(\y, G^\infty(\x)\right)
+\end{equation}
+and rewrite the upper bound as
+\begin{equation}
+    \E_{\psource(\x)} d\left(G^{\alpha_n}(\x), G^{\infty}(\x)\right) = \E_{\psource(\x)} \varphi(\x, G^{\alpha_n}(\x)) = \E_{\pi^{\alpha_n}(\x, \y)} \varphi(\x, \y).
+\end{equation}
+
+Due to Assumptions~\ref{A1},~\ref{A2} and Theorem~\ref{thm:continuity} the optimal transport map $G^\infty$ is continuous, which implies that this test function is bounded and continuous. Given the weak convergence of $\pi^{\alpha_n}$, we have
+\begin{align}
+    \E_{\pi^{\alpha_n}(\x, \y)} \varphi(\x, \y) &\rightarrow \E_{\pi^\infty(\x, \y)}\varphi(\x, \y) = \E_{\psource(\x)}\varphi(\x, G^\infty(\x)) =\\
+    &= \E_{\psource(\x)} d(G^\infty(\x), G^\infty(\x)) = 0,
+\end{align}
+which implies the desired
+\begin{equation}
+    \psource\left(\|G^{\alpha_n}(\x) - G^{\infty}(\x)\| > \eps\right) \rightarrow 0.
+\end{equation}
+\end{proof}\section{Methodology}
+\label{sec:method}
+Our main goal is to adapt the DMD method for the unpaired I2I between an arbitrary source distribution $\psource$ and target distribution $\ptarget$.
+\subsection{Regularized Distribution Matching Distillation}
+\label{subsec:rdmd}
+First, we note that the construction of DMD requires only having samples from the input distribution. Given this, we replace the Gaussian input $\pnoise$ by $\psource$, the data distribution $\pdata$ by $\ptarget$ and aim at optimizing
+\begin{multline}
+\label{eq:rdmd_kl_t_noreg}
+    \loss(\theta) = \int\limits_0^{\Tmax} \klweight \KL \Big( p_t^\theta \,\|\, \ptarget_t \Big) \rmd t = \\
+    =\int\limits_0^{\Tmax} \klweight \E_{\psource(\x) \mathcal{N}(\eps | 0, I)} \log \cfrac{\ptheta_t(\map(\x) + \sigma_t \eps)}{\ptarget_t(\map(\x) + \sigma_t \eps)} \,\rmd t,
+\end{multline}
+where $p^\theta_t$ and $\ptarget_t$ are now respectively the distribution of the generator output $\map(\x)$ and the target distribution $\ptarget$, perturbed by the forward process up to the timestep $t$.
+
+Optimizing the objective in Equation~\ref{eq:rdmd_kl_t_noreg}, one obtains a generator, which takes $\x \sim\psource$ and outputs $\map(\x) \sim \ptarget$, so it performs the desired transfer between the two distributions. However, there are no guarantees that the input and the output will be related. Similarly to the OT problem (Equation~\ref{eq:monge_ot_problem}), we fix the issue by penalizing the transport cost between them. We obtain the following objective
+\begin{equation}
+\label{eq:rdmd_loss}
+\loss^\lambda(\theta) = \loss(\theta) + \lambda\,\E_{\psource(\x)} c\left(\x, \map(\x)\right) \rightarrow\min\limits_{\theta},
+\end{equation}
+where $c(\cdot, \cdot)$ is the cost function, which describes the object properties that we aim to preserve after transfer,  and $\lambda$ is the regularization coefficient. Choosing the appropriate $\lambda$ will result in finding a balance between fitting the target distribution and preserving properties of the input.
+
+As in DMD, we assume that the perturbed target distributions are  represented by a pre-trained diffusion model $\starget_t$ and approximate the generator distribution score $\stheta_t$ by the additional fake diffusion model $\sfake_t$. Analogous to the DMD procedure (Equation~\ref{eq:dmd_training}), we perform the coordinate descent in which, however, the generator objective is now regularized. We call the procedure \emph{Regularized Distribution Matching Distillation} (RDMD). Formally, we optimize
+\begin{align}
+\label{eq:rdmd_training}
+\begin{cases}
+    \int\limits_{0}^{\Tmax} \klweight \E_{\eps, \x} \log \cfrac{\pfake_t(\map(\x) + \sigma_t \eps)}{\ptarget_t(\map(\x) + \sigma_t \eps)} \, \rmd t \\
+    \:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:\:+\:\lambda \, \E_{\psource(\x)} c\left(\x, \map(\x)\right) \rightarrow \min\limits_{\theta}; \\
+    \int\limits_{0}^{\Tmax} \smweight \E_{\eps, \x} \| \Dfake_t(\map(\x) + \sigma_t \eps) - \map(\x) \|^2 \,\rmd t \rightarrow \min\limits_{\phi}.
+\end{cases}
+\end{align}
+Given the optimal fake score $\sfake_t$, the generator's objective becomes equal to the desired loss in Equation~\ref{eq:rdmd_loss}, which validates the procedure.
+\subsection{Analysis of the method}
+\label{subseq:analysis}
+
+\begin{figure*}[!t]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{images/surface.png}
+\caption{Comparison of the DMD loss surfaces without (left) and with (right) transport cost regularization on a toy problem of translating $\mathcal{N}(0, I)$ to $\mathcal{N}(0, 1.5^2 I)$. We set the regularization coefficient $\lambda = 0.2$. The generator is parameterized as $r \cdot C(\alpha)$, where $C(\alpha)$ is the rotation matrix, corresponding to the angle $\alpha$. Minima at the left contains all orthogonal matrices, multiplied by $\sigma = 1.5$, while the minimum at the right is attained in the only point, which is close, but not equal, to the OT map. The surfaces are moved up for the sake of visualization.}
+\label{fig:surface}
+\end{center}
+\end{figure*}
+
+The optimization problem in Equation~\ref{eq:rdmd_loss} can be seen as the soft-constrained optimal transport, which balances between satisfying the output distribution constraint and preserving the original image properties. Moreover, if one takes $\lambda \rightarrow 0$, the objective essentially becomes equivalent to the Monge problem (Equation~\ref{eq:monge_ot_problem}). It can be seen by replacing the $\lambda$ coefficient before the transport cost with the $1/\lambda$ coefficient before the KL divergence. In the limit, it equals $+\infty$ whenever the generator output and the target distributions are different, which makes the corresponding problem hard-constrained and, therefore, equivalent to the original optimal transport problem. Based on this observation, we prove the following
+\begin{theorem}
+\label{thm1}
+    Let $c(\x, \y)$ be the quadratic cost $\|\x - \y\|^2$ and $G^\lambda$ be the theoretical optimum in the problem~\ref{eq:rdmd_loss}. Then, under mild regularity conditions, it converges in probability (with respect to $\psource$) to the optimal transport map $G^*$, i.e.
+    \begin{equation}
+        G^\lambda \xrightarrow[\lambda \rightarrow 0]{\psource} G^*.
+    \end{equation}
+\end{theorem}
+The detailed proof can be found in Appendix~\ref{sec:theory}. Informally, it means that the optimal transport map can be approximated by the RDMD generator, trained on Equation~\ref{eq:rdmd_training}, given a sufficiently small regularization coefficient, enough capacity of the architecture, and convergence of the optimization algorithm.
+
+This result is important to examine from another angle. It is ideologically similar to the $L_2$ regularization for over-parameterized least squares regression. The original least squares, in this case, have a manifold of solutions. At the same time, by adding $L_2$ weight penalty and taking the limit as the regularization coefficient goes to zero, one obtains a solution with the least norm based on the Moore-Penrose pseudo-inverse~\cite{moore1920reciprocal, penrose1955generalized}. In our case, numerous maps may be optimal in the original DMD procedure, since it only requires matching the distribution at output. However, taking the limit when $\lambda \rightarrow 0$, one obtains a feasible solution with the least transport cost.
+
+We demonstrate this effect on a toy problem of translating $\N(0, I)$ to $\N(0, \sigma^2 I)$ and consider linear generator $G(\x) = A \x$. The solution to the optimal transport problem with the quadratic cost $c(\x, \y) = \| \x - \y \|^2$ is $A = \sigma I$. For the DMD optimization problem without regularization, minima are obtained at the manifold of orthogonal matrices multiplied by $\sigma$: $AA^\top = \sigma^2I$. However, if one adds the regularization, the minimum compresses into one point at the cost of introducing the bias relatively to the true OT map. We illustrate this by comparing the loss surface with and without regularization in Figure~\ref{fig:surface}.

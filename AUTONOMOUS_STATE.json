@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "openreview_id": "KpaQc72q7m",
-  "phase": "claim_4_attempt_1_direct_2d_rdmd_toy_complete",
-  "next_action": "independent_review_claim_4_toy_against_literal_section_5_1",
+  "phase": "claim_1_attempt_1_source_cpu_feasibility_audit_complete_inconclusive",
+  "next_action": "independent_review_claim_1_source_cpu_feasibility_audit_before_any_claim_1_toy",
   "active_run_ids": [],
   "claim_attempt_counts": {
-    "1": 0,
+    "1": 1,
     "2": 0,
     "3": 0,
     "4": 1,
@@ -16,8 +16,12 @@
   "cpu_feasibility": "Claim 4 source-described 2D Gaussian-to-8-Gaussian experiment is a CPU-feasible direct toy route; image translation benchmark claims require unavailable full-scale training.",
   "claim_1_outcome": {
     "verdict": "inconclusive",
-    "scope": "Source/CPU feasibility audit only; no theorem outcome.",
-    "evidence": "evidence/source/SHA256SUMS"
+    "scope": "Pinned-primary-source theorem/CPU feasibility audit; finite CPU optimization cannot establish or falsify the universal theoretical-optimum gamma-convergence claim.",
+    "evidence": [
+      "evidence/claim1_attempt1/SOURCE_AUDIT.md",
+      "evidence/claim1_attempt1/source_excerpt.tex",
+      "evidence/source/SHA256SUMS"
+    ]
   },
   "claim_4_outcome": {
     "verdict": "toy",
